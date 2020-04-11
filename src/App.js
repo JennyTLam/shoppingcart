@@ -106,7 +106,24 @@ const App = () => {
        })
     }
     setCart(tempCart);
-    setCartTotal(cartTotal + productDict[id].price)
+    setCartTotal(cartTotal + productDict[id].price);
+  };
+
+  const cartRemove = (id) => {
+    setOpenCart(true);
+    let tempCart = cart;
+    for (let i = 0; i < tempCart.length; i++){
+      if (tempCart[i].itemId === id){
+        if (tempCart[i].qty === 1){
+          tempCart = tempCart.filter(function(value, index, tempCart){return value.itemId !== id;});
+        }
+        else{
+          tempCart[i].qty = tempCart[i].qty - 1;
+        }
+      }
+    }
+    setCart(tempCart);
+    setCartTotal(cartTotal - productDict[id].price);
   };
 
   const ShoppingCart = () => {
@@ -240,7 +257,7 @@ const App = () => {
                 <div>
                   <div>
                     <Button onClick={ () => cartAdd(products[i].sku) }> + </Button>
-                    <Button> - </Button>
+                    <Button onClick={ () => cartRemove(products[i].sku) }> - </Button>
                   </div>
                 </div>
                 <div style={{float:'right'}}>
