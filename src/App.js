@@ -49,7 +49,7 @@ const ShirtSizeSelector = () => (
 );
 
 const formatPrice = ( price ) => {
-  const result = price.toString().split(".");
+  const result = price.toFixed(2).toString().split(".");
   if (result.length === 1){
     return result[0] + "." + "00";
   }
@@ -66,6 +66,7 @@ const App = () => {
   const [data, setData] = useState({});
   const [openCart, setOpenCart] = useState(false);
   const [cart, setCart] = useState([]);
+  const [cartTotal, setCartTotal] = useState(0);
   
   const products = Object.values(data);
 
@@ -105,6 +106,7 @@ const App = () => {
        })
     }
     setCart(tempCart);
+    setCartTotal(cartTotal + productDict[id].price)
   };
 
   const ShoppingCart = () => {
@@ -128,6 +130,7 @@ const App = () => {
             </Column.Group>
           </Box>
           <Box style={{float:'left'}}>
+            <p> Total: ${formatPrice(cartTotal)} </p>
             <Button> Checkout </Button>
           </Box>
         </Drawer>
@@ -243,7 +246,7 @@ const App = () => {
                 <div style={{float:'right'}}>
                     <b>
                       <br></br>
-                      <p>QTY: 1</p>
+                      <p>QTY: {cart[i].qty} </p>
                       <br></br>
                       {products[i].currencyFormat}
                       {formatPrice(products[i].price)}
