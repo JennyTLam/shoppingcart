@@ -1,11 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import 'rbx/index.css'
-import { Button, Title, Container, Column, Card, Navbar, Delete, Box} from 'rbx';
+import { Message, Button, Title, Container, Column, Card, Navbar, Delete, Box} from 'rbx';
 import Drawer from '@material-ui/core/Drawer';
 import firebase from 'firebase/app';
-import 'firebase/auth';
 import 'firebase/database';
+import 'firebase/auth';
+import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 
+const uiConfig = {
+  signInFlow: 'popup',
+  signInOptions: [
+    firebase.auth.GoogleAuthProvider.PROVIDER_ID
+  ],
+  callbacks: {
+    signInSuccessWithAuthResult: () => false
+  }
+};
 
 const firebaseConfig = {
   apiKey: "AIzaSyAqXlhT3mjRfFXIcbhj2orBUziHAqNRFY8",
@@ -21,36 +31,29 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database().ref();
 
-const SignIn = () => {
-  return (
-    <Navbar>
-      <Navbar.Brand>
-        <Navbar.Item href="#">
-          <img
-            src="/data/logo.png"
-            alt=""
-            role="presentation"
-            width="150"
-            height="400"
-          />
-        </Navbar.Item>
-        <Navbar.Burger />
-      </Navbar.Brand>
-      <Navbar.Menu>
-        <Navbar.Segment align="end">
-          <Navbar.Item>
-            <Button.Group>
-              <Button color="primary">
-                <strong>Sign In</strong>
-              </Button>
-            </Button.Group>
-          </Navbar.Item>
-        </Navbar.Segment>
-      </Navbar.Menu>
-    </Navbar> 
-  );
-};
+const Welcome = ({ user }) => (
+  <Message color="info">
+    <Message.Header>
+      Welcome, {user.displayName}
+      <Button primary onClick={() => firebase.auth().signOut()}>
+        Log out
+      </Button>
+    </Message.Header>
+  </Message>
+);
 
+const SignIn = () => (
+  <StyledFirebaseAuth
+    uiConfig={uiConfig}
+    firebaseAuth={firebase.auth()}
+  />
+);
+
+const Banner = ({ user }) => (
+  <React.Fragment>
+    { user ? <Welcome user={ user } /> : <SignIn /> }
+  </React.Fragment>
+);
 
 
 const formatPrice = ( price ) => {
@@ -74,9 +77,7 @@ const App = () => {
   const [cartTotal, setCartTotal] = useState(0);
   const [inventory, setInventory] = useState({});
   const [count, setCount] = useState(0);
-
-
-
+  const [user, setUser] = useState(null);
   
   useEffect(() => {
     const fetchProducts = async () => {
@@ -93,6 +94,10 @@ const App = () => {
     };
     db.on('value', handleData, error => alert(error));
     return () => { db.off('value', handleData); };
+  }, []);
+
+  useEffect(() => {
+    firebase.auth().onAuthStateChanged(setUser);
   }, []);
 
   const products = Object.values(data);
@@ -189,7 +194,8 @@ const App = () => {
     return (
       <Container>
         <Button
-          onClick={() => setOpenCart(true)}> Cart 
+          style={{marginRight:'40px'}}
+          onClick={() => setOpenCart(true)}> <b>Cart </b>
         </Button>
         <Drawer
           width="100%"
@@ -214,7 +220,7 @@ const App = () => {
     );
   };
 
-  const WelcomeBanner = () => {
+  const WelcomeBanner = ({user}) => {
     return (
       <div>
         <div style={{padding:'10px', display:'inline-block'}}>
@@ -421,7 +427,9 @@ const App = () => {
     <React.Fragment>
       <br></br>
       <br></br>
-      <WelcomeBanner  />
+      <Banner user={user} />
+      <br></br>
+      <WelcomeBanner user={user} />
       <br></br>
       <Container>
         <Column.Group multiline="true">
