@@ -2,6 +2,24 @@ import React, { useEffect, useState } from 'react';
 import 'rbx/index.css'
 import { Button, Title, Container, Column, Card, Navbar, Delete, Box} from 'rbx';
 import Drawer from '@material-ui/core/Drawer';
+import firebase from 'firebase/app';
+import 'firebase/auth';
+import 'firebase/database';
+
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAqXlhT3mjRfFXIcbhj2orBUziHAqNRFY8",
+  authDomain: "shoppingcart-reactapp.firebaseapp.com",
+  databaseURL: "https://shoppingcart-reactapp.firebaseio.com",
+  projectId: "shoppingcart-reactapp",
+  storageBucket: "shoppingcart-reactapp.appspot.com",
+  messagingSenderId: "634387548610",
+  appId: "1:634387548610:web:d953ac9b8ec0bc96f92e5b",
+  measurementId: "G-BB8C10M49R"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database().ref();
 
 const SignIn = () => {
   return (
@@ -70,12 +88,11 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    const fetchInventory = async () => {
-      const response = await fetch('./data/inventory/inventory.json');
-      const json = await response.json();
-      setInventory(json);
+    const handleData = snap => {
+      if (snap.val()) setInventory(snap.val());
     };
-    fetchInventory();
+    db.on('value', handleData, error => alert(error));
+    return () => { db.off('value', handleData); };
   }, []);
 
   const products = Object.values(data);
